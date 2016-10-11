@@ -109,7 +109,10 @@ class AuthController extends ControllerBase {
         // update the auth0_user with the new userInfo object
         $this->auth0_update_auth0_object($userInfo);
 
-        user_login_finalize($user);
+        // Update field and role mappings
+        $this->auth0_update_fields_and_roles($userInfo, $user);
+
+      user_login_finalize($user);
     } else {
         // If the user doesn't exist we need to either create a new one, or assign him to an existing one
        // If the user doesn't exist we need to either create a new one, or assign him to an existing one
@@ -141,6 +144,9 @@ class AuthController extends ControllerBase {
         }
 
         $this->auth0_insert_auth0_user($userInfo, $user->id());
+
+        // Update field and role mappings
+        $this->auth0_update_fields_and_roles($userInfo, $user);
 
         user_login_finalize($user);
 
@@ -187,6 +193,143 @@ class AuthController extends ControllerBase {
           ->condition('auth0_id', $userInfo['user_id'], '=')
           ->execute();
   }
+
+  protected function auth0_update_fields_and_roles($userInfo, $user) {
+    function_exists('dd') && dd($userInfo, 'auth0_update_fields_and_roles called with userInfo');
+    function_exists('dd') && dd($user, 'auth0_update_fields_and_roles called with user');
+
+    $edit = array();
+    $this->auth0_update_fields($userInfo, $user, $edit);
+    $this->auth0_update_roles($userInfo, $user, $edit);
+//
+    function_exists('dd') && dd($edit, 'values to edit');
+    $user->save();
+//    user_save($the_user, $edit);
+//    //cache_clear_all('menu:'. $uid, TRUE);
+
+    //function_exists('dd') && dd(user_load($user->get('uid')), 'the_user after updates');
+  }
+
+  /*
+   * Update the $user profile attributes of a user based on the auth0 field mappings
+   */
+  protected function auth0_update_fields($user_info, $user, &$edit)
+  {
+    $config = \Drupal::service('config.factory')->get('auth0.settings');
+    $auth0_claim_mapping = $config->get('auth0_claim_mapping');
+    function_exists('dd') && dd($auth0_claim_mapping, 'auth0_claim_mapping');
+
+    if (isset($auth0_claim_mapping) && !empty($auth0_claim_mapping)) {
+      // For each claim mapping, lookup the value, otherwise set to blank
+      $mappings = $this->auth0_pipeListToArray($auth0_claim_mapping);
+      function_exists('dd') && dd($mappings, 'auth0_claim_mapping as array');
+
+      // Remove mappings handled automatically by the module
+      $skip_mappings = array('uid', 'name', 'mail', 'init', 'is_new', 'status', 'pass');
+      foreach ($mappings as $mapping) {
+        function_exists('dd') && dd($mapping, 'mapping');
+
+        $key = $mapping[1];
+        if (in_array($key, $skip_mappings)) {
+          function_exists('dd') && dd($mapping, 'skipping mapping handled already by auth0 module');
+        } else {
+          $value = isset($user_info[$mapping[0]]) ? $user_info[$mapping[0]] : '';
+          $current_value = $user->get($key)->value;
+          if ($current_value === $value) {
+            function_exists('dd') && dd($key, 'value is unchanged');
+          } else {
+            function_exists('dd') && dd($key . ' from [' . $current_value . '] to [' . $value . ']', 'value changed');
+            $edit[$key] = $value;
+            $user->set($key, $value);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Updates the $user->roles of a user based on the auth0 role mappings
+   */
+  protected function auth0_update_roles($user_info, $user, &$edit)
+  {
+    $config = \Drupal::service('config.factory')->get('auth0.settings');
+    $auth0_claim_to_use_for_role = $config->get('auth0_claim_to_use_for_role');
+    if (isset($auth0_claim_to_use_for_role) && !empty($auth0_claim_to_use_for_role)) {
+      $claim_value = isset($user_info[$auth0_claim_to_use_for_role]) ? $user_info[$auth0_claim_to_use_for_role] : '';
+      function_exists('dd') && dd($claim_value, 'claim_value');
+
+      $claim_values = array();
+      if (is_array($claim_value)) {
+        $claim_values = $claim_value;
+      } else {
+        $claim_values[] = $claim_value;
+      }
+      function_exists('dd') && dd($claim_values, 'claim_values');
+
+      $auth0_role_mapping = $config->get('auth0_role_mapping');
+      $mappings = $this->auth0_pipeListToArray($auth0_role_mapping);
+      function_exists('dd') && dd($mappings, 'auth0_role_mapping as array');
+
+      $roles_granted = array();
+      $roles_managed_by_mapping = array();
+      foreach ($mappings as $mapping) {
+        function_exists('dd') && dd($mapping, 'mapping');
+        $roles_managed_by_mapping[] = $mapping[1];
+
+        if (in_array($mapping[0], $claim_values)) {
+          $roles_granted[] = $mapping[1];
+        }
+      }
+      $roles_granted = array_unique($roles_granted);
+      $roles_managed_by_mapping = array_unique($roles_managed_by_mapping);
+      function_exists('dd') && dd($roles_granted, 'roles_granted');
+      function_exists('dd') && dd($roles_managed_by_mapping, 'roles_managed_by_mapping');
+
+      $not_granted = array_diff($roles_managed_by_mapping, $roles_granted);
+      function_exists('dd') && dd($not_granted, 'not_granted');
+
+      $user_roles = $user->getRoles();
+      function_exists('dd') && dd($user_roles, 'user_roles');
+
+      $new_user_roles = array_merge(array_diff($user_roles, $not_granted), $roles_granted);
+      function_exists('dd') && dd($new_user_roles, 'new_user_roles');
+
+      $tmp = array_diff($new_user_roles, $user_roles);
+      if (empty($tmp)) {
+        function_exists('dd') && dd('no changes to roles detected');
+      } else {
+        function_exists('dd') && dd($new_user_roles, 'changes to roles detected');
+        $edit['roles'] = $new_user_roles;
+        foreach (array_diff($new_user_roles, $user_roles) as $new_role) {
+          $user->addRole($new_role);
+        }
+        foreach (array_diff($user_roles, $new_user_roles) as $remove_role) {
+          $user->removeRole($remove_role);
+        }
+      }
+    }
+  }
+
+  protected function auth0_mappingsToPipeList($mappings) {
+    $result_text = "";
+    foreach ($mappings as $map) {
+      $result_text .= $map['from'] . '|' . $map['user_entered'] . "\n";
+    }
+    return $result_text;
+  }
+
+  protected function auth0_pipeListToArray($mapping_list_txt, $make_item0_lowercase = FALSE) {
+    $result_array = array();
+    $mappings = preg_split('/[\n\r]+/', $mapping_list_txt);
+    foreach ($mappings as $line) {
+      if (count($mapping = explode('|', trim($line))) == 2) {
+        $item_0 = ($make_item0_lowercase) ? drupal_strtolower(trim($mapping[0])) : trim($mapping[0]);
+        $result_array[] = array($item_0, trim($mapping[1]));
+      }
+    }
+    return $result_array;
+  }
+
 
   protected function auth0_insert_auth0_user ($userInfo, $uid) {
 

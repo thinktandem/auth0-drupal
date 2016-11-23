@@ -1,14 +1,17 @@
 <?php
+namespace Drupal\auth0\Form;
 /**
  * @file
  * Contains \Drupal\auth0\Form\BasicSettingsForm.
  */
 
-namespace Drupal\auth0\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * This forms handles the basic module configurations.
+ */
 class BasicSettingsForm extends FormBase {
 
   /**

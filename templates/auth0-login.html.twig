@@ -4,7 +4,7 @@
 <script type="text/javascript">
 
     var lock_options = {{ lockExtraSettings|raw }};
-    lock_options.container = ('container' in lock_options) ? lock_options.container : 'auth0-login-form';
+    lock_options.container = lock_options.container || 'auth0-login-form';
     lock_options.allowSignUp = lock_options.allowSignUp || {{showSignup ? "true" : "false"}};
     lock_options.auth = lock_options.auth || {};
     lock_options.auth.container = lock_options.auth.container || 'auth0-login-form';

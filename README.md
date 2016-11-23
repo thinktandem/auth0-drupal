@@ -6,6 +6,11 @@ Single Sign On for Enterprises + Social Login + User/Passwords. For all your Dru
 Demo: <http://auth0-drupal.azurewebsites.net>
 
 [Drupal Readme](https://github.com/auth0/auth0-drupal/blob/master/README.txt)
+## Compatibility
+### Drupal 8
+The `v2` targets support for Drupal 8.
+### Drupal 7
+The `v1` targets support for Drupal 7. Also, you can get the code from the `1.x.x` branch in this repo.
 
 ## Scenarios
 
@@ -41,13 +46,9 @@ Advanced Settings
 
 ![](https://cloudup.com/csJdSV841Lh+)
 
-Configuring Social Login
 
-![](https://raw.githubusercontent.com/auth0/wp-auth0/master/screenshot-4.png)
 
-Configuring Enterprise Login
 
-![](https://raw.githubusercontent.com/auth0/wp-auth0/master/screenshot-6.png)
 
 ## Issue Reporting
 
@@ -59,4 +60,4 @@ If you have found a bug or if you have a feature request, please report them at 
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE.txt) file for more info.
+This project is licensed under the [GPL](http://www.gnu.org/licenses/gpl.html).

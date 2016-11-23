@@ -1,4 +1,4 @@
-Drupal Plugin for Auth0
+Drupal8 Plugin for Auth0
 ====
 
 Single Sign On for Enterprises + Social Login + User/Passwords. For all your Drupal instances. Powered by Auth0.

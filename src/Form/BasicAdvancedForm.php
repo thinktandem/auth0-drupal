@@ -1,10 +1,10 @@
 <?php
 namespace Drupal\auth0\Form;
+
 /**
  * @file
  * Contains \Drupal\auth0\Form\BasicAdvancedForm.
  */
-
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -54,6 +54,17 @@ class BasicAdvancedForm extends FormBase {
         '#title' => t('Requires verified email'),
         '#default_value' => $config->get('auth0_requires_verified_email'),
         '#description' => t('Mark this if you require the user to have a verified email to login.')
+    );
+
+    $form['auth0_join_user_by_mail_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Link auth0 logins to drupal users by email address'),
+      '#default_value' => $config->get('auth0_join_user_by_mail_enabled'),
+      '#description' => t('If enabled, when a user logs into Drupal for the first time, the system will use the email 
+address of the Auth0 user to search for a drupal user with the same email address and setup a link to that 
+Drupal user account.
+<br/>If not enabled, then a new Drupal user will be created even if a Drupal user with the same email address already exists.
+')
     );
 
     $form['auth0_login_css'] = array(
@@ -143,6 +154,7 @@ Drupal roles not listed above will not be changed by this module.
             ->set('auth0_allow_signup', $form_state->getValue('auth0_allow_signup'))
             ->set('auth0_widget_cdn', $form_state->getValue('auth0_widget_cdn'))
             ->set('auth0_requires_verified_email', $form_state->getValue('auth0_requires_verified_email'))
+            ->set('auth0_join_user_by_mail_enabled', $form_state->getValue('auth0_join_user_by_mail_enabled'))
             ->set('auth0_login_css', $form_state->getValue('auth0_login_css'))
             ->set('auth0_auto_register', $form_state->getValue('auth0_auto_register'))
             ->set('auth0_lock_extra_settings', $form_state->getValue('auth0_lock_extra_settings'))

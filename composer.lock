@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a496da82e0e598a9a5dfb9ff933c830d",
-    "content-hash": "abee1b7b29b941452253d738db2f780e",
+    "hash": "d56426bba2c9cce9377b785c6f942875",
+    "content-hash": "9dc41612e1f905f99885cd467b09b56f",
     "packages": [
         {
             "name": "adoy/oauth2",

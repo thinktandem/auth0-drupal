@@ -1,7 +1,17 @@
 <?php
+/**
+ * @file
+ * Contains \Drupal\auth0\Controller\AuthController.
+ */
 
 namespace Drupal\auth0\Controller;
 
+// Create a variable to store the path to this module and load vendor files if they exist
+define('AUTH0_PATH', drupal_get_path('module', 'auth0'));
+function_exists('dd') && dd(AUTH0_PATH, 'AUTH0_PATH');
+if (file_exists(AUTH0_PATH . '/vendor/autoload.php')) {
+  require_once (AUTH0_PATH . '/vendor/autoload.php');
+}
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
@@ -65,27 +75,25 @@ class AuthController extends ControllerBase {
     $config = \Drupal::service('config.factory')->get('auth0.settings');
 
     $auth0 = new Auth0(array(
-      'domain'        => $config->get('auth0_domain'),
-      'client_id'     => $config->get('auth0_client_id'),
-      'client_secret' => $config->get('auth0_client_secret'),
-      'redirect_uri'  => "$base_root/auth0/callback",
-      'store'         => false
+        'domain'        => $config->get('auth0_domain'),
+        'client_id'     => $config->get('auth0_client_id'),
+        'client_secret' => $config->get('auth0_client_secret'),
+        'redirect_uri'  => "$base_root/auth0/callback",
+        'store'         => false
     ));
 
     $userInfo = null;
 
     try {
-      $userInfo = $auth0->getUserInfo();
-      $idToken = $auth0->getIdToken();
-    }
-    catch (\Exception $e) {
+        $userInfo = $auth0->getUserInfo();
+        $idToken = $auth0->getIdToken();
+    } catch (\Exception $e) {
 
     }
 
     if ($userInfo) {
       return $this->processUserLogin($request, $userInfo, $idToken);
-    }
-    else {
+    } else {
       drupal_set_message(t('There was a problem logging you in, sorry by the inconvenience.'),'error');
 
       return new RedirectResponse('/');
@@ -128,9 +136,12 @@ class AuthController extends ControllerBase {
     }
 
     // See if there is a user in the auth0_user table with the user info client id.
+    function_exists('dd') && dd($userInfo['user_id'], 'looking up drupal user by auth0 user_id');
     $user = $this->findAuth0User($userInfo['user_id']);
 
     if ($user) {
+      function_exists('dd') && dd($user->id(), 'uid of existing drupal user found');
+
       // User exists!
       // update the auth0_user with the new userInfo object.
       $this->updateAuth0User($userInfo);
@@ -142,6 +153,8 @@ class AuthController extends ControllerBase {
       $this->eventDispatcher->dispatch(Auth0UserSigninEvent::NAME, $event);
     }
     else {
+      function_exists('dd') && dd('existing drupal user NOT found');
+
       try {
         $user = $this->signupUser($userInfo);
       }
@@ -173,15 +186,26 @@ class AuthController extends ControllerBase {
         $isDatabaseUser = true;
       }
     }
+    function_exists('dd') && dd($isDatabaseUser, 'isDatabaseUser');
     $joinUser = false;
-    // If the user has a verified email or is a database user try to see if there is
-    // a user to join with. The isDatabase is because we don't want to allow database
-    // user creation if there is an existing one with no verified email.
-    if ($userInfo['email_verified'] || $isDatabaseUser) {
-      $joinUser = user_load_by_mail($userInfo['email']);
+
+    $config = \Drupal::service('config.factory')->get('auth0.settings');
+    if ($config->get('auth0_join_user_by_mail_enabled')) {
+      function_exists('dd') && dd($userInfo['email'], 'join user by mail is enabled, looking up user by email');
+      // If the user has a verified email or is a database user try to see if there is
+      // a user to join with. The isDatabase is because we don't want to allow database
+      // user creation if there is an existing one with no verified email.
+      if ($userInfo['email_verified'] || $isDatabaseUser) {
+        $joinUser = user_load_by_mail($userInfo['email']);
+      }
+    } else {
+      function_exists('dd') && dd($userInfo['email'], 'join user by mail is not enabled, skipping lookup user by email');
     }
 
+
     if ($joinUser) {
+      function_exists('dd') && dd($joinUser->id(), 'drupal user found by email with uid');
+
       // If we are here, we have a potential join user.
       // Don't allow creation or assignation of user if the email is not verified,
       // that would be hijacking.
@@ -191,8 +215,11 @@ class AuthController extends ControllerBase {
       $user = $joinUser;
     }
     else {
+      function_exists('dd') && dd('creating new drupal user from auth0 user');
+      
       // If we are here, we need to create the user.
       $user = $this->createDrupalUser($userInfo);
+      
       // Update field and role mappings
       $this->auth0_update_fields_and_roles($userInfo, $user);
     }
@@ -459,4 +486,5 @@ class AuthController extends ControllerBase {
 
     return new RedirectResponse('/');
   }
+
 }

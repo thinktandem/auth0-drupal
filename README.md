@@ -6,11 +6,6 @@ Single Sign On for Enterprises + Social Login + User/Passwords. For all your Dru
 Demo: <http://auth0-drupal.azurewebsites.net>
 
 [Drupal Readme](https://github.com/auth0/auth0-drupal/blob/master/README.txt)
-## Compatibility
-### Drupal 8
-The `v2` targets support for Drupal 8.
-### Drupal 7
-The `v1` targets support for Drupal 7. Also, you can get the code from the `1.x.x` branch in this repo.
 
 ## Compatibility
 

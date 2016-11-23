@@ -216,7 +216,7 @@ class AuthController extends ControllerBase {
     }
     else {
       function_exists('dd') && dd('creating new drupal user from auth0 user');
-      
+
       // If we are here, we need to create the user.
       $user = $this->createDrupalUser($userInfo);
       

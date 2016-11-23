@@ -116,13 +116,13 @@ class AuthController extends ControllerBase {
       $this->validateUserEmail($userInfo);
     }
     catch (EmailNotSetException $e) {
-        drupal_set_message(
-          t('This account does not have an email associated. Please login with a different provider.'),
-          'error'
-        );
+      drupal_set_message(
+        t('This account does not have an email associated. Please login with a different provider.'),
+        'error'
+      );
 
-        return new RedirectResponse('/');
-      }
+      return new RedirectResponse('/');
+    }
     catch (EmailNotVerifiedException $e) {
       return $this->auth0FailWithVerifyEmail($idToken);
     }
@@ -134,7 +134,7 @@ class AuthController extends ControllerBase {
       // User exists!
       // update the auth0_user with the new userInfo object.
       $this->updateAuth0User($userInfo);
-      
+
       // Update field and role mappings
       $this->auth0_update_fields_and_roles($userInfo, $user);
 
@@ -154,7 +154,7 @@ class AuthController extends ControllerBase {
       $event = new Auth0UserSignupEvent($user, $userInfo);
       $this->eventDispatcher->dispatch(Auth0UserSignupEvent::NAME, $event);
     }
-      user_login_finalize($user);
+    user_login_finalize($user);
 
     if ($request->request->has('destination')) {
       return $this->redirect($request->request->get('destination'));
@@ -167,29 +167,29 @@ class AuthController extends ControllerBase {
    */
   protected function signupUser($userInfo) {
     // If the user doesn't exist we need to either create a new one, or assign him to an existing one.
-      $isDatabaseUser = false;
-      foreach ($userInfo['identities'] as $identity) {
-        if ($identity['provider'] == "auth0") {
-          $isDatabaseUser = true;
-        }
+    $isDatabaseUser = false;
+    foreach ($userInfo['identities'] as $identity) {
+      if ($identity['provider'] == "auth0") {
+        $isDatabaseUser = true;
       }
-      $joinUser = false;
-      // If the user has a verified email or is a database user try to see if there is
-      // a user to join with. The isDatabase is because we don't want to allow database
+    }
+    $joinUser = false;
+    // If the user has a verified email or is a database user try to see if there is
+    // a user to join with. The isDatabase is because we don't want to allow database
     // user creation if there is an existing one with no verified email.
-      if ($userInfo['email_verified'] || $isDatabaseUser) {
-        $joinUser = user_load_by_mail($userInfo['email']);
-      }
+    if ($userInfo['email_verified'] || $isDatabaseUser) {
+      $joinUser = user_load_by_mail($userInfo['email']);
+    }
 
-      if ($joinUser) {
+    if ($joinUser) {
       // If we are here, we have a potential join user.
       // Don't allow creation or assignation of user if the email is not verified,
       // that would be hijacking.
-        if (!$userInfo['email_verified']) {
+      if (!$userInfo['email_verified']) {
         throw new EmailNotVerifiedException();
-        }
-        $user = $joinUser;
       }
+      $user = $joinUser;
+    }
     else {
       // If we are here, we need to create the user.
       $user = $this->createDrupalUser($userInfo);
@@ -198,7 +198,7 @@ class AuthController extends ControllerBase {
     }
 
     return $user;
-    }
+  }
 
   /**
    * Email not verified error message.
@@ -443,7 +443,7 @@ class AuthController extends ControllerBase {
 
       $client->request('POST', $url, array(
           "headers" => array(
-        "Authorization" => "Bearer $token"
+            "Authorization" => "Bearer $token"
           )
         )
       );

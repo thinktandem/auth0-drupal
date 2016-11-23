@@ -12,6 +12,16 @@ The `v2` targets support for Drupal 8.
 ### Drupal 7
 The `v1` targets support for Drupal 7. Also, you can get the code from the `1.x.x` branch in this repo.
 
+## Compatibility
+
+### Drupal 8
+
+The `v2` targets support for Drupal 8.
+
+### Drupal 7
+
+The `v1` targets support for Drupal 7. Also, you can get the code from the `1.x.x` branch in this repo.
+
 ## Scenarios
 
 ### Single Sign On across Multiple Drupal

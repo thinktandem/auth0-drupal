@@ -7,12 +7,12 @@ use Symfony\Component\EventDispatcher\Event;
  * User signin event.
  */
 class Auth0UserSigninEvent extends Event {
-  
+
   const NAME = 'auth0.signin';
 
   protected $user;
   protected $auth0Profile;
-  
+
   /**
    * Initialize the event.
    */

@@ -7,7 +7,7 @@ use Symfony\Component\EventDispatcher\Event;
  * User signup event.
  */
 class Auth0UserSignupEvent extends Event {
-  
+
   const NAME = 'auth0.signup';
 
   protected $user;

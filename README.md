@@ -1,4 +1,4 @@
-Drupal Plugin for Auth0
+Drupal8 Plugin for Auth0
 ====
 
 Single Sign On for Enterprises + Social Login + User/Passwords. For all your Drupal instances. Powered by Auth0.
@@ -51,13 +51,9 @@ Advanced Settings
 
 ![](https://cloudup.com/csJdSV841Lh+)
 
-Configuring Social Login
 
-![](https://raw.githubusercontent.com/auth0/wp-auth0/master/screenshot-4.png)
 
-Configuring Enterprise Login
 
-![](https://raw.githubusercontent.com/auth0/wp-auth0/master/screenshot-6.png)
 
 ## Issue Reporting
 
@@ -69,4 +65,4 @@ If you have found a bug or if you have a feature request, please report them at 
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE.txt) file for more info.
+This project is licensed under the [GPL](http://www.gnu.org/licenses/gpl.html).

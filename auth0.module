@@ -385,8 +385,9 @@ function auth0_update_roles($user_info, $uid, $the_user, &$edit)
     $new_user_roles = array_merge(array_diff($user_roles, $not_granted), $roles_granted);
     function_exists('dd') && dd($new_user_roles, 'new_user_roles');
 
-    $tmp = array_diff($new_user_roles, $user_roles);
-    if (!empty($tmp)) {
+    $roles_added = array_diff($new_user_roles, $user_roles);
+    $roles_subtracted = array_diff($user_roles, $new_user_roles);
+    if (!empty($roles_added) || !empty($roles_subtracted)) {
       $new_user_roles_map = array();
       foreach ($new_user_roles as $new_role) {
         $role = user_role_load_by_name($new_role);
@@ -639,8 +640,8 @@ function auth0_advanced_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Link auth0 logins to drupal users by email address'),
     '#default_value' => variable_get('auth0_join_user_by_mail_enabled', FALSE),
-    '#description' => t('If enabled, when a user logs into Drupal for the first time, the system will use the email 
-address of the Auth0 user to search for a drupal user with the same email address and setup a link to that 
+    '#description' => t('If enabled, when a user logs into Drupal for the first time, the system will use the email
+address of the Auth0 user to search for a drupal user with the same email address and setup a link to that
 Drupal user account.
 <br/>If not enabled, then a new Drupal user will be created even if a Drupal user with the same email address already exists.
 '),
@@ -714,7 +715,7 @@ Drupal user account.
 <br/>admin|administrator
 <br/>poweruser|power users
 <br/>
-<br/>NOTE: for any drupal role in the mapping, if a user is not mapped to the role, the role will be removed from their profile.  
+<br/>NOTE: for any drupal role in the mapping, if a user is not mapped to the role, the role will be removed from their profile.
 Drupal roles not listed above will not be changed by this module.
 ')
   );

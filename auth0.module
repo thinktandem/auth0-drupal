@@ -400,7 +400,9 @@ function auth0_update_roles($user_info, $uid, $the_user, &$edit)
       $new_user_roles_map = array();
       foreach ($new_user_roles as $new_role) {
         $role = user_role_load_by_name($new_role);
-        $new_user_roles_map[$role->rid] = $role->name;
+        if (isset($role) && !empty($role)) {
+          $new_user_roles_map[$role->rid] = $role->name;
+        }
       }
       function_exists('dd') && dd($new_user_roles_map, 'changes to roles detected');
       $edit['roles'] = $new_user_roles_map;

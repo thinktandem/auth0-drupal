@@ -167,7 +167,18 @@ function auth0_callback() {
     $success = auth0_login_auth0_user($user_info, $id_token);
   }
   if (!$success) {
-    drupal_set_message(t('There was a problem logging you in, sorry for the inconvenience.'), 'error');
+
+    // Start up the error collector
+    $error = array('auth0_lock_error');
+    $default_desc = 'There was a problem logging you in, sorry for the inconvenience';
+
+    // Attempt to get more error info
+    $error[] = isset($_GET['error']) ? $_GET['error'] : 'unknown';
+    $error[] = isset($_GET['error_description']) ? $_GET['error_description'] : $default_desc;
+
+    // Set the message
+    drupal_set_message(implode(':', $error), 'error');
+
   }
 
   return drupal_goto();
@@ -845,6 +856,7 @@ function template_preprocess_auth0_lock(&$vars) {
   $vars['domain'] = check_plain(variable_get("auth0_domain", ''));
   $vars['client_id'] = check_plain(variable_get("auth0_client_id", ''));
   $vars['lock_extra_settings'] = json_decode(variable_get("auth0_lock_extra_settings", ''), true);
+  $vars['show'] = new stdClass();
 
   if ($vars['lock_extra_settings'] === null) {
     $vars['lock_extra_settings'] = array();
@@ -874,7 +886,7 @@ function template_preprocess_auth0_lock(&$vars) {
     $vars['params']['disableResetAction'] = FALSE;
   }
 
-  drupal_alter('auth0_params', $vars['params']);
+  drupal_alter('auth0_params', $vars['params'], $vars['show']);
 
   // Generate a link to a login form to be displayed as a no-js fallback.
   if (isset($vars['params']['authParams']['state'])) {
@@ -906,7 +918,8 @@ function template_preprocess_auth0_lock(&$vars) {
     'auth0' => array(
       'client_id' => $vars['client_id'],
       'domain' => $vars['domain'],
-      'options' => $vars['params']
+      'options' => $vars['params'],
+      'show' => $vars['show']
       )), 'setting');
 
   // Add the Drupal behavior to initialize the widget.

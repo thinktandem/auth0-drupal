@@ -1,4 +1,5 @@
 (function ($) {
+
   /**
    * Attach the Auth0 Lock widget to the login form.
    */
@@ -8,7 +9,7 @@
 
         var lock = new Auth0Lock(settings.auth0.client_id, settings.auth0.domain, settings.auth0.options);
 
-        lock.show();
+        lock.show(settings.auth0.show);
       })
     }
   }
